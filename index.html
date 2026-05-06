@@ -157,6 +157,24 @@
             font-size: 11px; color: rgba(255,255,255,0.45);
             padding: 0 2px;
         }
+
+        #load-more-btn {
+            display: block;
+            width: 100%;
+            margin: 20px 0 8px;
+            padding: 14px;
+            background: var(--surface);
+            border: 1.5px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.18s, opacity 0.18s;
+        }
+        #load-more-btn:active { background: #e0e0e0; }
+        #load-more-btn:disabled { opacity: 0.5; cursor: default; }
     </style>
 </head>
 <body>
@@ -284,27 +302,21 @@
         renderPodcasts(filtered);
     };
 
-    async function openPodcast(p) {
-        viewGrid.style.display = 'none';
-        viewDetail.style.display = 'block';
-        backBtn.style.display = 'block';
-        searchInput.style.display = 'none';
+    let currentPodcast = null;
+    let currentPage = 1;
+    const HITS_PER_PAGE = 20;
 
-        document.getElementById('pd-img').src = p.image;
-        document.getElementById('pd-title').textContent = p.title;
-        document.getElementById('pd-author').textContent = 'di ' + p.author;
-
-        const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${p.id}/?pg=1&hits=20`));
-        const json = await res.json();
-
+    function renderEpisodes(episodes, podcastImage) {
         const container = document.getElementById('ep-items');
-        container.innerHTML = '';
-        json.data.forEach(ep => {
+        // Rimuove il bottone "carica altri" se presente
+        const existingBtn = document.getElementById('load-more-btn');
+        if (existingBtn) existingBtn.remove();
+
+        episodes.forEach(ep => {
             const item = document.createElement('div');
             item.className = 'ep-item';
             item.innerHTML = `
-                <img class="ep-thumb" src="${ep.image || p.image}">
+                <img class="ep-thumb" src="${ep.image || podcastImage}">
                 <div class="ep-info">
                     <div class="ep-title">${ep.title}</div>
                     <div class="ep-desc">${ep.description || ''}</div>
@@ -314,10 +326,63 @@
                 </button>`;
             item.onclick = (e) => {
                 e.stopPropagation();
-                play(ep.episode_raw_url, ep.title, p.title, ep.image || p.image);
+                play(ep.episode_raw_url, ep.title, currentPodcast.title, ep.image || podcastImage);
             };
             container.appendChild(item);
         });
+    }
+
+    async function loadMoreEpisodes() {
+        if (!currentPodcast) return;
+        const btn = document.getElementById('load-more-btn');
+        btn.textContent = 'Caricamento…';
+        btn.disabled = true;
+
+        currentPage++;
+        const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${currentPodcast.id}/?pg=${currentPage}&hits=${HITS_PER_PAGE}`));
+        const json = await res.json();
+
+        if (json.data && json.data.length > 0) {
+            renderEpisodes(json.data, currentPodcast.image);
+            appendLoadMoreButton(json.data.length);
+        } else {
+            btn.remove();
+        }
+    }
+
+    function appendLoadMoreButton(fetchedCount) {
+        const container = document.getElementById('ep-items');
+        if (fetchedCount < HITS_PER_PAGE) return; // nessun altro episodio
+        const btn = document.createElement('button');
+        btn.id = 'load-more-btn';
+        btn.textContent = 'Carica altri episodi';
+        btn.onclick = loadMoreEpisodes;
+        container.appendChild(btn);
+    }
+
+    async function openPodcast(p) {
+        currentPodcast = p;
+        currentPage = 1;
+
+        viewGrid.style.display = 'none';
+        viewDetail.style.display = 'block';
+        backBtn.style.display = 'block';
+        searchInput.style.display = 'none';
+
+        document.getElementById('pd-img').src = p.image;
+        document.getElementById('pd-title').textContent = p.title;
+        document.getElementById('pd-author').textContent = 'di ' + p.author;
+
+        const container = document.getElementById('ep-items');
+        container.innerHTML = '';
+
+        const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${p.id}/?pg=1&hits=${HITS_PER_PAGE}`));
+        const json = await res.json();
+
+        renderEpisodes(json.data, p.image);
+        appendLoadMoreButton(json.data.length);
     }
 
     function play(url, title, author, image) {
