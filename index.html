@@ -54,10 +54,6 @@
         .ep-title { font-size: 14px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; color: var(--text); }
         .ep-desc { font-size: 12px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        .ep-progress-bar { height: 3px; background: var(--surface2); border-radius: 2px; margin-top: 8px; overflow: hidden; display: none; }
-        .ep-progress-bar.has-progress { display: block; }
-        .ep-progress-fill { height: 100%; background: #00bcd4; border-radius: 2px; }
-
         .ep-play-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); border: none; color: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
         .ep-play-btn:active { transform: scale(0.92); }
 
@@ -83,7 +79,7 @@
         #player-expanded { position: fixed; inset: 0; z-index: 300; background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%); display: flex; flex-direction: column; align-items: center; padding: env(safe-area-inset-top, 12px) 24px calc(32px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); overflow: hidden; justify-content: space-between; height: 100dvh; max-height: 100dvh; }
         #player-expanded.visible { transform: translateY(0); }
         #exp-topbar { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 0; flex-shrink: 0; }
-        #exp-podcast-name { position: absolute; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); text-align: center; pointer-events: none; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #exp-podcast-name { position: absolute; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); text-align: center; pointer-events: auto; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
         #exp-close-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.7); padding: 8px; display: flex; align-items: center; }
         #exp-cover { display: flex; align-items: center; justify-content: center; flex: 1; perspective: 1000px; padding: 4px 0; }
         #exp-cover-inner { position: relative; width: min(320px, 82vw, 52vh); height: min(320px, 82vw, 52vh); transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,0,.2,1); cursor: pointer; }
@@ -357,12 +353,6 @@ function makePlayBtn(onPlay) {
     btn.addEventListener('click', (e) => { e.stopPropagation(); onPlay(); });
     return btn;
 }
-function makeProgressBar(ratio) {
-    const bar = document.createElement('div');
-    bar.className = 'ep-progress-bar' + (ratio > 0.01 ? ' has-progress' : '');
-    bar.innerHTML = `<div class="ep-progress-fill" style="width:${(ratio * 100).toFixed(1)}%"></div>`;
-    return bar;
-}
 
 // ── Media Session ─────────────────────────────────────────────
 function setupMediaSession(title, author, image) {
@@ -538,10 +528,6 @@ async function loadNewEpisodes() {
     const episodes = results.filter(Boolean).sort((a, b) => b.ep.timestamp - a.ep.timestamp).slice(0, 5);
     list.innerHTML = '';
     episodes.forEach(({ ep, podcast }) => {
-        const savedTime = loadProgress(podcast.id, ep.id);
-        const estimatedDuration = ep.duration || (savedTime > 0 ? savedTime * 1.1 : 0);
-        const ratio = getProgressRatio(podcast.id, ep.id, estimatedDuration);
-
         const item = document.createElement('div');
         item.className = 'new-ep-item';
 
@@ -552,7 +538,6 @@ async function loadNewEpisodes() {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'new-ep-info';
         infoDiv.innerHTML = `<div class="new-ep-title">${decodeHTML(ep.title)}</div><div class="new-ep-meta">${formatDate(ep.timestamp)}${ep.duration ? ' · ' + formatDuration(ep.duration) : ''}</div>`;
-        infoDiv.appendChild(makeProgressBar(ratio));
 
         const playBtn = makePlayBtn(async () => {
             if (!currentPodcast || currentPodcast.id !== podcast.id) {
@@ -613,13 +598,7 @@ function renderEpisodes(episodes, podcastImage) {
 
         const info = document.createElement('div');
         info.className = 'ep-info';
-
-        const savedTime = loadProgress(currentPodcast?.id, ep.id);
-        const estimatedDuration = ep.duration || (savedTime > 0 ? savedTime * 1.1 : 0);
-        const ratio = getProgressRatio(currentPodcast?.id, ep.id, estimatedDuration);
-
         info.innerHTML = `<div class="ep-title">${decodeHTML(ep.title)}</div><div class="ep-desc">${decodeHTML(ep.summary || stripHTML(ep.content_html || ''))}</div>`;
-        info.appendChild(makeProgressBar(ratio));
 
         const playBtn = makePlayBtn(() => {
             currentEpisodeIndex = epIndex;
@@ -731,6 +710,7 @@ function play(url, title, author, image) {
     document.getElementById('p-title').textContent = decodeHTML(title);
     document.getElementById('p-pod').textContent = author;
     document.getElementById('p-thumb').src = image;
+    document.getElementById('exp-podcast-name').textContent = currentPodcast ? decodeHTML(currentPodcast.title) : author;
     playerBar.classList.add('visible');
     document.querySelector('main').style.paddingBottom = '220px';
     document.getElementById('play-svg').style.display = 'none';
@@ -806,7 +786,7 @@ function openExpanded() { playerExpanded.classList.add('visible'); document.body
 function closeExpanded() { playerExpanded.classList.remove('visible'); document.body.style.overflow = ''; }
 function syncExpanded() {
     document.getElementById('exp-cover-img').src = document.getElementById('p-thumb').src;
-    document.getElementById('exp-podcast-name').textContent = document.getElementById('p-pod').textContent;
+    document.getElementById('exp-podcast-name').textContent = currentPodcast ? decodeHTML(currentPodcast.title) : document.getElementById('p-pod').textContent;
     document.getElementById('exp-title').textContent = document.getElementById('p-title').textContent;
     document.getElementById('exp-author').textContent = document.getElementById('p-pod').textContent;
     document.getElementById('exp-cover-inner').classList.remove('flipped');
@@ -821,6 +801,17 @@ function syncExpandedPlayState() {
 }
 document.getElementById('p-thumb').addEventListener('click', () => { syncExpanded(); openExpanded(); });
 document.getElementById('exp-close-btn').addEventListener('click', closeExpanded);
+document.getElementById('exp-podcast-name').addEventListener('click', () => {
+    if (!currentPodcast) return;
+    closeExpanded();
+    setTimeout(async () => {
+        viewDetail.style.display = 'none';
+        viewGrid.style.display = 'block';
+        backBtn.style.display = 'none';
+        searchInput.style.display = '';
+        await openPodcast(currentPodcast);
+    }, 350);
+});
 document.getElementById('exp-pp-btn').addEventListener('click', () => { if (audio.paused) audio.play(); else audio.pause(); syncExpandedPlayState(); });
 audio.addEventListener('play', syncExpandedPlayState);
 audio.addEventListener('pause', syncExpandedPlayState);
