@@ -54,7 +54,7 @@
             background: var(--surface); padding: 0 12px; font-size: 16px; outline: none;
         }
 
-        main { padding: 16px; padding-bottom: 190px; padding-top: 8px; }
+        main { padding: 16px; padding-bottom: 160px; padding-top: 8px; }
 
         #grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .card { cursor: pointer; transition: opacity 0.2s; }
@@ -216,11 +216,11 @@
         </div>
     </div>
     <div id="player-middle">
-        <button class="p-ctrl-btn" id="skip-back-btn" title="Indietro 15s">
+        <button class="p-ctrl-btn" id="skip-back-btn" title="Indietro 10s">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.57"/>
             </svg>
-            <span>15s</span>
+            <span>10s</span>
         </button>
         <button id="pp-bar">
             <svg id="play-svg" width="22" height="22" viewBox="0 0 24 24" fill="#1a1a2e"><polygon points="6,3 20,12 6,21"/></svg>
@@ -228,11 +228,11 @@
                 <rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/>
             </svg>
         </button>
-        <button class="p-ctrl-btn" id="skip-fwd-btn" title="Avanti 30s">
+        <button class="p-ctrl-btn" id="skip-fwd-btn" title="Avanti 10s">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.57"/>
             </svg>
-            <span>30s</span>
+            <span>10s</span>
         </button>
     </div>
     <div id="player-timeline">
@@ -266,8 +266,8 @@
             });
             navigator.mediaSession.setActionHandler('play', () => audio.play());
             navigator.mediaSession.setActionHandler('pause', () => audio.pause());
-            navigator.mediaSession.setActionHandler('seekbackward', () => audio.currentTime -= 15);
-            navigator.mediaSession.setActionHandler('seekforward', () => audio.currentTime += 30);
+            navigator.mediaSession.setActionHandler('seekbackward', () => audio.currentTime -= 10);
+            navigator.mediaSession.setActionHandler('seekforward', () => audio.currentTime += 10);
         }
     }
 
@@ -345,15 +345,17 @@
 
         if (json.data && json.data.length > 0) {
             renderEpisodes(json.data, currentPodcast.image);
-            appendLoadMoreButton(json.data.length);
+            if (json.data.length >= HITS_PER_PAGE) {
+                appendLoadMoreButton();
+            }
+            // altrimenti il bottone rimane rimosso (già rimosso da renderEpisodes)
         } else {
             btn.remove();
         }
     }
 
-    function appendLoadMoreButton(fetchedCount) {
+    function appendLoadMoreButton() {
         const container = document.getElementById('ep-items');
-        if (fetchedCount < HITS_PER_PAGE) return; // nessun altro episodio
         const btn = document.createElement('button');
         btn.id = 'load-more-btn';
         btn.textContent = 'Carica altri episodi';
@@ -382,7 +384,7 @@
         const json = await res.json();
 
         renderEpisodes(json.data, p.image);
-        appendLoadMoreButton(json.data.length);
+        appendLoadMoreButton(); // mostra sempre il bottone al primo caricamento
     }
 
     function play(url, title, author, image) {
@@ -392,6 +394,7 @@
         document.getElementById('p-pod').textContent = author;
         document.getElementById('p-thumb').src = image;
         playerBar.classList.add('visible');
+        document.querySelector('main').style.paddingBottom = '220px';
         document.getElementById('play-svg').style.display = 'none';
         document.getElementById('pause-svg').style.display = '';
         setupMediaSession(title, author, image);
@@ -462,11 +465,11 @@
     })();
 
     document.getElementById('skip-back-btn').addEventListener('click', () => {
-        audio.currentTime = Math.max(0, audio.currentTime - 15);
+        audio.currentTime = Math.max(0, audio.currentTime - 10);
     });
 
     document.getElementById('skip-fwd-btn').addEventListener('click', () => {
-        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30);
+        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
     });
 
     init();
