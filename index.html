@@ -2,15 +2,13 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    >
-    >
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Il Post">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Il Post Podcast — Mobile</title>
-    //fonts.googleapis.com">
-    //fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #ffffff;
@@ -23,7 +21,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
         #ptr-indicator {
             position: fixed; top: 0; left: 0; right: 0; z-index: 999;
@@ -140,18 +138,16 @@
         #prog-bar:active #prog-thumb { transform: translateY(-50%) scale(1.3); }
         #time-row { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.45); padding: 0 2px; }
 
-        /* Player espanso */
+        /* Player espanso — layout ottimizzato per smartphone */
         #player-expanded {
             position: fixed; inset: 0; z-index: 300;
             background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
             display: flex; flex-direction: column; align-items: center;
-            padding: 0 24px calc(24px + var(--safe-bottom));
-            padding-top: 40px;
+            padding: env(safe-area-inset-top, 12px) 24px calc(32px + var(--safe-bottom));
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(.4,0,.2,1);
             overflow: hidden;
-            justify-content: center;
-            gap: 12px;
+            justify-content: space-between;
             height: 100dvh;
             max-height: 100dvh;
         }
@@ -159,7 +155,7 @@
 
         #exp-topbar {
             display: flex; align-items: center; justify-content: space-between;
-            width: 100%; position: relative;
+            width: 100%; padding: 8px 0; flex-shrink: 0;
         }
         #exp-podcast-name {
             position: absolute; left: 50%; transform: translateX(-50%);
@@ -175,14 +171,16 @@
             display: flex; align-items: center;
         }
 
-        /* Flip copertina */
+        /* Flip copertina — dimensione adattiva */
         #exp-cover {
             display: flex; align-items: center; justify-content: center;
-            perspective: 1000px;
+            flex: 1; perspective: 1000px;
+            padding: 8px 0;
         }
         #exp-cover-inner {
             position: relative;
-            width: min(300px, 72vw); height: min(300px, 72vw);
+            width: min(260px, 65vw, 40vh);
+            height: min(260px, 65vw, 40vh);
             transform-style: preserve-3d;
             transition: transform 0.6s cubic-bezier(.4,0,.2,1);
             cursor: pointer;
@@ -229,8 +227,12 @@
         #exp-cover-back-text.scrolling { scrollbar-color: rgba(255,255,255,0.35) transparent; }
         #exp-cover-back-text.scrolling::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); }
 
+        /* Sezione inferiore del player espanso */
+        #exp-bottom {
+            width: 100%; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0;
+        }
         #exp-meta { width: 100%; }
-        #exp-title { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 4px; }
+        #exp-title { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 3px; }
         #exp-author { font-size: 14px; color: rgba(255,255,255,0.55); }
 
         #exp-timeline { width: 100%; }
@@ -267,7 +269,6 @@
         .new-ep-title { font-size: 13px; font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .new-ep-play { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); border: none; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
 
-        /* Stella preferiti */
         .star-btn {
             position: absolute; top: 6px; right: 6px;
             background: none; border: none;
@@ -281,7 +282,7 @@
         #load-more-btn {
             display: block; width: 100%; margin: 20px 0 8px; padding: 14px;
             background: var(--surface); border: 1.5px solid rgba(0,0,0,0.12);
-            border-radius: var(--radius); font-family: 'Inter', system-ui, sans-serif;
+            border-radius: var(--radius); font-family: inherit;
             font-size: 15px; font-weight: 700; color: var(--text);
             cursor: pointer; transition: background 0.18s, opacity 0.18s;
         }
@@ -291,7 +292,7 @@
         #speed-btn, #exp-speed-btn {
             background: rgba(255,255,255,0.12);
             border: 1px solid rgba(255,255,255,0.35);
-            color: #ffffff; font-family: 'Inter', system-ui, sans-serif;
+            color: #ffffff; font-family: inherit;
             font-size: 11px; font-weight: 700;
             padding: 0; border-radius: 50%; cursor: pointer;
             width: 38px; height: 38px;
@@ -356,13 +357,13 @@
         <button id="speed-btn" title="Velocità di riproduzione">1x</button>
     </div>
     <div id="player-middle">
-        <button class="p-ctrl-btn" id="prev-ep-btn" title="Episodio precedente">
+        <button class="p-ctrl-btn" id="prev-ep-btn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
         </button>
-        <button class="p-ctrl-btn" id="skip-back-btn" title="Indietro 10s">
+        <button class="p-ctrl-btn" id="skip-back-btn">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
+                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
             </svg>
         </button>
         <button id="pp-bar">
@@ -371,13 +372,13 @@
                 <rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/>
             </svg>
         </button>
-        <button class="p-ctrl-btn" id="skip-fwd-btn" title="Avanti 10s">
+        <button class="p-ctrl-btn" id="skip-fwd-btn">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
-                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
+                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
             </svg>
         </button>
-        <button class="p-ctrl-btn" id="next-ep-btn" title="Episodio successivo">
+        <button class="p-ctrl-btn" id="next-ep-btn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
         </button>
     </div>
@@ -398,8 +399,9 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <span id="exp-podcast-name"></span>
-        <button id="exp-speed-btn" title="Velocità di riproduzione">1x</button>
+        <button id="exp-speed-btn">1x</button>
     </div>
+
     <div id="exp-cover">
         <div id="exp-cover-inner">
             <div id="exp-cover-front">
@@ -411,44 +413,47 @@
             </div>
         </div>
     </div>
-    <div id="exp-meta">
-        <div id="exp-title"></div>
-        <div id="exp-author"></div>
-    </div>
-    <div id="exp-timeline">
-        <div id="exp-prog-bar">
-            <div id="exp-prog-track"><div id="exp-prog-fill"><div id="exp-prog-thumb"></div></div></div>
+
+    <div id="exp-bottom">
+        <div id="exp-meta">
+            <div id="exp-title"></div>
+            <div id="exp-author"></div>
         </div>
-        <div id="exp-time-row">
-            <span id="exp-time-current">0:00</span>
-            <span id="exp-time-total">0:00</span>
+        <div id="exp-timeline">
+            <div id="exp-prog-bar">
+                <div id="exp-prog-track"><div id="exp-prog-fill"><div id="exp-prog-thumb"></div></div></div>
+            </div>
+            <div id="exp-time-row">
+                <span id="exp-time-current">0:00</span>
+                <span id="exp-time-total">0:00</span>
+            </div>
         </div>
-    </div>
-    <div id="exp-controls">
-        <button class="exp-ctrl-btn" id="exp-prev-btn">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
-        </button>
-        <button class="exp-ctrl-btn" id="exp-skip-back-btn">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
-            </svg>
-        </button>
-        <button id="exp-pp-btn">
-            <svg id="exp-play-svg" width="26" height="26" viewBox="0 0 24 24" fill="#1a1a2e"><polygon points="6,3 20,12 6,21"/></svg>
-            <svg id="exp-pause-svg" width="26" height="26" viewBox="0 0 24 24" fill="#1a1a2e" style="display:none">
-                <rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/>
-            </svg>
-        </button>
-        <button class="exp-ctrl-btn" id="exp-skip-fwd-btn">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
-                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
-            </svg>
-        </button>
-        <button class="exp-ctrl-btn" id="exp-next-btn">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
-        </button>
+        <div id="exp-controls">
+            <button class="exp-ctrl-btn" id="exp-prev-btn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
+            </button>
+            <button class="exp-ctrl-btn" id="exp-skip-back-btn">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                    <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
+                </svg>
+            </button>
+            <button id="exp-pp-btn">
+                <svg id="exp-play-svg" width="26" height="26" viewBox="0 0 24 24" fill="#1a1a2e"><polygon points="6,3 20,12 6,21"/></svg>
+                <svg id="exp-pause-svg" width="26" height="26" viewBox="0 0 24 24" fill="#1a1a2e" style="display:none">
+                    <rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/>
+                </svg>
+            </button>
+            <button class="exp-ctrl-btn" id="exp-skip-fwd-btn">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+                    <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
+                </svg>
+            </button>
+            <button class="exp-ctrl-btn" id="exp-next-btn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -521,7 +526,6 @@
         return (tmp.textContent || tmp.innerText || '').trim();
     }
 
-    // Salvataggio e ripristino progresso per episodio
     function saveProgress(podcastId, episodeId, currentTime) {
         if (!episodeId || !podcastId) return;
         localStorage.setItem(`progress_${podcastId}_${episodeId}`, currentTime);
@@ -850,7 +854,6 @@
             document.getElementById('exp-prog-fill').style.width = pct;
             document.getElementById('time-current').textContent = formatTime(audio.currentTime);
             document.getElementById('exp-time-current').textContent = formatTime(audio.currentTime);
-            // Salva ogni ~5 secondi
             if (Math.round(audio.currentTime) % 5 === 0) {
                 saveProgress(currentPodcast?.id, currentEpisodeList[currentEpisodeIndex]?.id, audio.currentTime);
             }
