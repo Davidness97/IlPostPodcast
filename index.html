@@ -158,6 +158,51 @@
             padding: 0 2px;
         }
 
+        /* Sezione nuovi episodi */
+        #new-episodes-section { margin-bottom: 28px; display: none; }
+        #new-episodes-section h2 { font-size: 22px; margin-bottom: 16px; }
+        .new-ep-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+        }
+        .new-ep-thumb {
+            width: 52px; height: 52px; border-radius: 8px;
+            object-fit: cover; flex-shrink: 0; background: #eee;
+        }
+        .new-ep-info { flex: 1; min-width: 0; }
+        .new-ep-podcast { font-size: 11px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .new-ep-title { font-size: 13px; font-weight: 700; line-height: 1.3;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .new-ep-play {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+            border: none; color: white; display: flex; align-items: center;
+            justify-content: center; flex-shrink: 0; cursor: pointer;
+        }
+
+        /* Sezione preferiti */
+        #favorites-section { margin-bottom: 24px; }
+        #favorites-section h2 { font-size: 22px; margin-bottom: 16px; }
+        #favorites-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        #favorites-empty { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+
+        /* Bottone stella */
+        .star-btn {
+            position: absolute; top: 6px; right: 6px;
+            background: rgba(255,255,255,0.85);
+            border: none; border-radius: 50%;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 24px; line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            transition: transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .star-btn:active { transform: scale(0.88); }
+        .card { position: relative; }
+        .card.is-favorite .card-name { color: var(--text); }
+        .card.is-favorite img { outline: 2.5px solid #f5c518; outline-offset: -2px; border-radius: var(--radius); }
+
         #load-more-btn {
             display: block;
             width: 100%;
@@ -191,6 +236,10 @@
 
 <main>
     <div id="view-grid">
+        <div id="new-episodes-section">
+            <h2>🆕 Nuovi episodi</h2>
+            <div id="new-episodes-list"></div>
+        </div>
         <h2 id="grid-title" style="margin-bottom:16px; font-size:22px;">Tutti i podcast</h2>
         <div id="grid"></div>
     </div>
@@ -216,11 +265,16 @@
         </div>
     </div>
     <div id="player-middle">
-        <button class="p-ctrl-btn" id="skip-back-btn" title="Indietro 10s">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.57"/>
+        <button class="p-ctrl-btn" id="prev-ep-btn" title="Episodio precedente">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/>
             </svg>
-            <span>10s</span>
+        </button>
+        <button class="p-ctrl-btn" id="skip-back-btn" title="Indietro 10s">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
+            </svg>
         </button>
         <button id="pp-bar">
             <svg id="play-svg" width="22" height="22" viewBox="0 0 24 24" fill="#1a1a2e"><polygon points="6,3 20,12 6,21"/></svg>
@@ -229,10 +283,15 @@
             </svg>
         </button>
         <button class="p-ctrl-btn" id="skip-fwd-btn" title="Avanti 10s">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.57"/>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+                <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
             </svg>
-            <span>10s</span>
+        </button>
+        <button class="p-ctrl-btn" id="next-ep-btn" title="Episodio successivo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/>
+            </svg>
         </button>
     </div>
     <div id="player-timeline">
@@ -268,6 +327,8 @@
             navigator.mediaSession.setActionHandler('pause', () => audio.pause());
             navigator.mediaSession.setActionHandler('seekbackward', () => audio.currentTime -= 10);
             navigator.mediaSession.setActionHandler('seekforward', () => audio.currentTime += 10);
+            navigator.mediaSession.setActionHandler('previoustrack', () => playEpisodeAtIndex(currentEpisodeIndex - 1));
+            navigator.mediaSession.setActionHandler('nexttrack', () => playEpisodeAtIndex(currentEpisodeIndex + 1));
         }
     }
 
@@ -279,18 +340,113 @@
             const json = await res.json();
             allPodcasts = (json.data || []).sort((a, b) => a.title.localeCompare(b.title));
             renderPodcasts(allPodcasts);
+            renderFavorites();
+        loadNewEpisodes();
+            loadNewEpisodes();
         } catch (e) { console.error("Errore fetch", e); }
+    }
+
+    let favorites = JSON.parse(localStorage.getItem('podcast_favorites') || '[]');
+
+    function saveFavorites() {
+        localStorage.setItem('podcast_favorites', JSON.stringify(favorites));
+    }
+
+    function isFavorite(id) {
+        return favorites.includes(id);
+    }
+
+    function toggleFavorite(e, p) {
+        e.stopPropagation();
+        if (isFavorite(p.id)) {
+            favorites = favorites.filter(f => f !== p.id);
+        } else {
+            favorites.push(p.id);
+        }
+        saveFavorites();
+        renderPodcasts(allPodcasts.filter(pod =>
+            pod.title.toLowerCase().includes(searchInput.value.toLowerCase().trim()) ||
+            pod.author.toLowerCase().includes(searchInput.value.toLowerCase().trim())
+        ));
+        renderFavorites();
+    }
+
+    function buildCard(p) {
+        const el = document.createElement('div');
+        el.className = isFavorite(p.id) ? 'card is-favorite' : 'card';
+        const starred = isFavorite(p.id) ? '★' : '☆';
+        el.innerHTML = `
+            <img src="${p.image}" loading="lazy">
+            <button class="star-btn" title="Aggiungi ai preferiti">${starred}</button>
+            <div class="card-name">${decodeHTML(p.title)}</div>`;
+        el.onclick = () => openPodcast(p);
+        el.querySelector('.star-btn').onclick = (e) => toggleFavorite(e, p);
+        return el;
+    }
+
+    async function loadNewEpisodes() {
+        const section = document.getElementById('new-episodes-section');
+        const list = document.getElementById('new-episodes-list');
+        const favPodcasts = allPodcasts.filter(p => isFavorite(p.id));
+        if (favPodcasts.length === 0) { section.style.display = 'none'; return; }
+
+        const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const results = await Promise.all(favPodcasts.map(p =>
+            fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${p.id}/?pg=1&hits=1`))
+                .then(r => r.json())
+                .then(json => json.data && json.data[0] ? { ep: json.data[0], podcast: p } : null)
+                .catch(() => null)
+        ));
+
+        const episodes = results
+            .filter(Boolean)
+            .sort((a, b) => b.ep.timestamp - a.ep.timestamp)
+            .slice(0, 5);
+
+        list.innerHTML = '';
+        episodes.forEach(({ ep, podcast }) => {
+            const item = document.createElement('div');
+            item.className = 'new-ep-item';
+            item.innerHTML = `
+                <img class="new-ep-thumb" src="${ep.image || podcast.image}">
+                <div class="new-ep-info">
+                    <div class="new-ep-podcast">${decodeHTML(podcast.title)}</div>
+                    <div class="new-ep-title">${decodeHTML(ep.title)}</div>
+                </div>
+                <button class="new-ep-play">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>`;
+            item.onclick = async (e) => {
+                e.stopPropagation();
+                // Carica la lista episodi del podcast per abilitare prev/next
+                if (!currentPodcast || currentPodcast.id !== podcast.id) {
+                    currentPodcast = podcast;
+                    currentPage = 1;
+                    const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
+                    const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${podcast.id}/?pg=1&hits=${HITS_PER_PAGE}`));
+                    const json = await res.json();
+                    currentEpisodeList = json.data || [];
+                }
+                currentEpisodeIndex = currentEpisodeList.findIndex(e => e.id === ep.id);
+                if (currentEpisodeIndex === -1) currentEpisodeIndex = 0;
+                play(ep.episode_raw_url, ep.title, ep.author || podcast.author, ep.image || podcast.image);
+                updatePrevNextButtons();
+            };
+            list.appendChild(item);
+        });
+
+        section.style.display = episodes.length > 0 ? 'block' : 'none';
+    }
+
+    function renderFavorites() {
+        // I preferiti sono ora integrati nella griglia principale
     }
 
     function renderPodcasts(list) {
         grid.innerHTML = '';
-        list.forEach(p => {
-            const el = document.createElement('div');
-            el.className = 'card';
-            el.innerHTML = `<img src="${p.image}" loading="lazy"><div class="card-name">${decodeHTML(p.title)}</div>`;
-            el.onclick = () => openPodcast(p);
-            grid.appendChild(el);
-        });
+        const favs = list.filter(p => isFavorite(p.id));
+        const others = list.filter(p => !isFavorite(p.id));
+        [...favs, ...others].forEach(p => grid.appendChild(buildCard(p)));
     }
 
     searchInput.oninput = (e) => {
@@ -305,11 +461,26 @@
     let currentPodcast = null;
     let currentPage = 1;
     const HITS_PER_PAGE = 20;
+    let currentEpisodeList = [];
+    let currentEpisodeIndex = -1;
 
     function decodeHTML(str) {
         const txt = document.createElement('textarea');
         txt.innerHTML = str;
         return txt.value;
+    }
+
+    function playEpisodeAtIndex(index) {
+        if (index < 0 || index >= currentEpisodeList.length) return;
+        currentEpisodeIndex = index;
+        const ep = currentEpisodeList[index];
+        play(ep.episode_raw_url, ep.title, ep.author || currentPodcast.author, ep.image || currentPodcast.image);
+        updatePrevNextButtons();
+    }
+
+    function updatePrevNextButtons() {
+        document.getElementById('prev-ep-btn').style.opacity = currentEpisodeIndex > 0 ? '1' : '0.3';
+        document.getElementById('next-ep-btn').style.opacity = currentEpisodeIndex < currentEpisodeList.length - 1 ? '1' : '0.3';
     }
 
     function renderEpisodes(episodes, podcastImage) {
@@ -330,9 +501,12 @@
                 <button class="ep-play-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
                 </button>`;
+            const epIndex = episodes.indexOf(ep);
             item.onclick = (e) => {
                 e.stopPropagation();
+                currentEpisodeIndex = epIndex;
                 play(ep.episode_raw_url, ep.title, ep.author || currentPodcast.author, ep.image || podcastImage);
+                updatePrevNextButtons();
             };
             container.appendChild(item);
         });
@@ -350,6 +524,7 @@
         const json = await res.json();
 
         if (json.data && json.data.length > 0) {
+            currentEpisodeList = [...currentEpisodeList, ...json.data];
             renderEpisodes(json.data, currentPodcast.image);
             if (json.data.length >= HITS_PER_PAGE) {
                 appendLoadMoreButton();
@@ -389,13 +564,45 @@
         const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${p.id}/?pg=1&hits=${HITS_PER_PAGE}`));
         const json = await res.json();
 
+        currentEpisodeList = json.data;
         renderEpisodes(json.data, p.image);
         appendLoadMoreButton(); // mostra sempre il bottone al primo caricamento
+    }
+
+    function episodeKey(url) {
+        // Usa encodeURIComponent per gestire caratteri speciali, poi btoa
+        try {
+            return 'ep_pos_' + btoa(encodeURIComponent(url)).slice(0, 40);
+        } catch(e) {
+            // Fallback: hash semplice dell'URL
+            let hash = 0;
+            for (let i = 0; i < url.length; i++) hash = (hash << 5) - hash + url.charCodeAt(i);
+            return 'ep_pos_' + Math.abs(hash).toString(36);
+        }
+    }
+
+    function savePosition() {
+        if (audio.src && audio.currentTime > 5) {
+            localStorage.setItem(episodeKey(audio.src), Math.floor(audio.currentTime));
+        }
+    }
+
+    function getSavedPosition(url) {
+        return parseInt(localStorage.getItem(episodeKey(url)) || '0', 10);
+    }
+
+    function clearSavedPosition(url) {
+        localStorage.removeItem(episodeKey(url));
     }
 
     function play(url, title, author, image) {
         audio.src = url;
         audio.play();
+        audio.addEventListener('loadedmetadata', function onMeta() {
+            audio.removeEventListener('loadedmetadata', onMeta);
+            const saved = getSavedPosition(url);
+            if (saved > 10) audio.currentTime = saved;
+        });
         document.getElementById('p-title').textContent = decodeHTML(title);
         document.getElementById('p-pod').textContent = author;
         document.getElementById('p-thumb').src = image;
@@ -426,9 +633,21 @@
     };
 
     audio.onended = () => {
-        document.getElementById('play-svg').style.display = '';
-        document.getElementById('pause-svg').style.display = 'none';
+        clearSavedPosition(audio.src);
+        if (currentEpisodeIndex < currentEpisodeList.length - 1) {
+            playEpisodeAtIndex(currentEpisodeIndex + 1);
+        } else {
+            document.getElementById('play-svg').style.display = '';
+            document.getElementById('pause-svg').style.display = 'none';
+        }
     };
+
+    document.getElementById('prev-ep-btn').addEventListener('click', () => {
+        playEpisodeAtIndex(currentEpisodeIndex - 1); // prev = episodio più recente
+    });
+    document.getElementById('next-ep-btn').addEventListener('click', () => {
+        playEpisodeAtIndex(currentEpisodeIndex + 1); // next = episodio più vecchio
+    });
 
     function formatTime(s) {
         if (isNaN(s) || !isFinite(s)) return '0:00';
@@ -437,10 +656,15 @@
         return m + ':' + (sec < 10 ? '0' : '') + sec;
     }
 
+    let lastSave = 0;
     audio.ontimeupdate = () => {
         if (audio.duration) {
             document.getElementById('prog-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
             document.getElementById('time-current').textContent = formatTime(audio.currentTime);
+            if (Math.floor(audio.currentTime) % 5 === 0 && Math.floor(audio.currentTime) !== lastSave) {
+                lastSave = Math.floor(audio.currentTime);
+                savePosition();
+            }
         }
     };
 
