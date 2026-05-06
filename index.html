@@ -2,15 +2,15 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-180.png">
+    >
+    >
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Il Post">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Il Post Podcast — Mobile</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    //fonts.googleapis.com">
+    //fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #ffffff;
@@ -146,11 +146,12 @@
             background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
             display: flex; flex-direction: column; align-items: center;
             padding: 0 24px calc(24px + var(--safe-bottom));
+            padding-top: 40px;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(.4,0,.2,1);
             overflow: hidden;
             justify-content: center;
-            gap: 24px;
+            gap: 12px;
             height: 100dvh;
             max-height: 100dvh;
         }
@@ -461,13 +462,14 @@
     const searchInput = document.getElementById('search');
     let allPodcasts = [];
 
-    // Pull to refresh
+    // Pull to refresh — disabilitato quando il player espanso è aperto
     (function() {
         let startY = null, pulling = false;
         const threshold = 80;
         const indicator = document.getElementById('ptr-indicator');
         const spinner = document.getElementById('ptr-spinner');
         document.addEventListener('touchstart', (e) => {
+            if (document.getElementById('player-expanded').classList.contains('visible')) return;
             if (window.scrollY === 0) startY = e.touches[0].clientY;
         }, { passive: true });
         document.addEventListener('touchmove', (e) => {
@@ -517,6 +519,16 @@
         const tmp = document.createElement('div');
         tmp.innerHTML = html;
         return (tmp.textContent || tmp.innerText || '').trim();
+    }
+
+    // Salvataggio e ripristino progresso per episodio
+    function saveProgress(podcastId, episodeId, currentTime) {
+        if (!episodeId || !podcastId) return;
+        localStorage.setItem(`progress_${podcastId}_${episodeId}`, currentTime);
+    }
+
+    function loadProgress(podcastId, episodeId) {
+        return parseFloat(localStorage.getItem(`progress_${podcastId}_${episodeId}`) || '0');
     }
 
     function setupMediaSession(title, author, image) {
@@ -760,22 +772,30 @@
     function play(url, title, author, image) {
         if (currentHls) { currentHls.destroy(); currentHls = null; }
         const isHLS = url && (url.endsWith('.m3u8') || url.includes('.m3u8'));
+        const podcastId = currentPodcast?.id;
+        const episodeId = currentEpisodeList[currentEpisodeIndex]?.id;
+
         if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
             currentHls = new Hls();
             currentHls.loadSource(url);
             currentHls.attachMedia(audio);
             currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                const saved = loadProgress(podcastId, episodeId);
+                if (saved > 5) audio.currentTime = saved;
                 audio.play();
                 audio.playbackRate = speeds[speedIndex];
             });
         } else {
             audio.src = url;
-            audio.play();
+            audio.addEventListener('loadedmetadata', function onSeek() {
+                audio.removeEventListener('loadedmetadata', onSeek);
+                const saved = loadProgress(podcastId, episodeId);
+                if (saved > 5) audio.currentTime = saved;
+                audio.play();
+                audio.playbackRate = speeds[speedIndex];
+            });
         }
-        audio.addEventListener('loadedmetadata', function onMeta() {
-            audio.removeEventListener('loadedmetadata', onMeta);
-            audio.playbackRate = speeds[speedIndex];
-        });
+
         document.getElementById('p-title').textContent = decodeHTML(title);
         document.getElementById('p-pod').textContent = author;
         document.getElementById('p-thumb').src = image;
@@ -830,6 +850,10 @@
             document.getElementById('exp-prog-fill').style.width = pct;
             document.getElementById('time-current').textContent = formatTime(audio.currentTime);
             document.getElementById('exp-time-current').textContent = formatTime(audio.currentTime);
+            // Salva ogni ~5 secondi
+            if (Math.round(audio.currentTime) % 5 === 0) {
+                saveProgress(currentPodcast?.id, currentEpisodeList[currentEpisodeIndex]?.id, audio.currentTime);
+            }
         }
     };
 
