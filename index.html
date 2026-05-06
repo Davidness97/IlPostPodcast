@@ -175,11 +175,72 @@
             display: flex; align-items: center; flex-shrink: 0;
         }
 
-        #exp-cover { display: flex; align-items: center; justify-content: center; padding: 12px 0; flex-shrink: 0; }
-        #exp-cover img {
+        /* Flip copertina */
+        #exp-cover {
+            display: flex; align-items: center; justify-content: center;
+            padding: 12px 0; flex-shrink: 0;
+            perspective: 1000px;
+        }
+        #exp-cover-inner {
+            position: relative;
             width: min(340px, 80vw); height: min(340px, 80vw);
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(.4,0,.2,1);
+            cursor: pointer;
+        }
+        #exp-cover-inner.flipped { transform: rotateY(180deg); }
+        #exp-cover-front, #exp-cover-back {
+            position: absolute; inset: 0;
+            border-radius: 16px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        #exp-cover-front img {
+            width: 100%; height: 100%;
             border-radius: 16px; object-fit: cover;
             box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+        }
+        #exp-cover-back {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+            transform: rotateY(180deg);
+            display: flex; flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #exp-cover-back-title {
+            font-size: 13px; font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 10px; flex-shrink: 0;
+        }
+        #exp-cover-back-text {
+            font-size: 13px; line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+            overflow-y: auto;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+        #exp-cover-back-text::-webkit-scrollbar {
+            width: 3px;
+        }
+        #exp-cover-back-text::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #exp-cover-back-text::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 10px;
+        }
+        #exp-cover-back-text.scrolling {
+            scrollbar-color: rgba(255,255,255,0.35) transparent;
+        }
+        #exp-cover-back-text.scrolling::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.35);
         }
 
         #exp-meta { margin-bottom: 12px; flex-shrink: 0; }
@@ -242,7 +303,6 @@
         #load-more-btn:active { background: #e0e0e0; }
         #load-more-btn:disabled { opacity: 0.5; cursor: default; }
 
-        /* Bottone velocità — Liquid Glass */
         #speed-btn, #exp-speed-btn {
             background: rgba(255,255,255,0.12);
             border: 1px solid rgba(255,255,255,0.35);
@@ -356,7 +416,17 @@
         <span id="exp-podcast-name"></span>
         <button id="exp-speed-btn" title="Velocità di riproduzione">1x</button>
     </div>
-    <div id="exp-cover"><img id="exp-cover-img" src=""></div>
+    <div id="exp-cover">
+        <div id="exp-cover-inner">
+            <div id="exp-cover-front">
+                <img id="exp-cover-img" src="">
+            </div>
+            <div id="exp-cover-back">
+                <div id="exp-cover-back-title">Descrizione episodio</div>
+                <div id="exp-cover-back-text"></div>
+            </div>
+        </div>
+    </div>
     <div id="exp-meta">
         <div id="exp-title"></div>
         <div id="exp-author"></div>
@@ -410,16 +480,13 @@
 
     // Pull to refresh
     (function() {
-        let startY = null;
-        let pulling = false;
+        let startY = null, pulling = false;
         const threshold = 80;
         const indicator = document.getElementById('ptr-indicator');
         const spinner = document.getElementById('ptr-spinner');
-
         document.addEventListener('touchstart', (e) => {
             if (window.scrollY === 0) startY = e.touches[0].clientY;
         }, { passive: true });
-
         document.addEventListener('touchmove', (e) => {
             if (startY === null) return;
             const dy = e.touches[0].clientY - startY;
@@ -431,7 +498,6 @@
                 spinner.style.transform = `rotate(${progress * 180}deg)`;
             }
         }, { passive: true });
-
         document.addEventListener('touchend', (e) => {
             if (pulling && startY !== null) {
                 const dy = e.changedTouches[0].clientY - startY;
@@ -444,10 +510,31 @@
                     spinner.style.opacity = '0';
                 }
             }
-            startY = null;
-            pulling = false;
+            startY = null; pulling = false;
         }, { passive: true });
     })();
+
+    // Flip copertina
+    document.getElementById('exp-cover-inner').addEventListener('click', () => {
+        document.getElementById('exp-cover-inner').classList.toggle('flipped');
+    });
+
+    // Scrollbar visibile solo durante lo scroll
+    (function() {
+        const el = document.getElementById('exp-cover-back-text');
+        let timer;
+        el.addEventListener('scroll', () => {
+            el.classList.add('scrolling');
+            clearTimeout(timer);
+            timer = setTimeout(() => el.classList.remove('scrolling'), 800);
+        });
+    })();
+
+    function stripHTML(html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return (tmp.textContent || tmp.innerText || '').trim();
+    }
 
     function setupMediaSession(title, author, image) {
         if ('mediaSession' in navigator) {
@@ -603,7 +690,7 @@
                 <img class="ep-thumb" src="${ep.image || podcastImage}">
                 <div class="ep-info">
                     <div class="ep-title">${decodeHTML(ep.title)}</div>
-                    <div class="ep-desc">${decodeHTML(ep.description || '')}</div>
+                    <div class="ep-desc">${decodeHTML(ep.summary || stripHTML(ep.content_html || ''))}</div>
                 </div>
                 <button class="ep-play-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></button>`;
             const epIndex = episodes.indexOf(ep);
@@ -677,6 +764,16 @@
         setSpeed(speeds[speedIndex]);
     });
 
+    function updateEpisodeDescription() {
+        const currentEp = currentEpisodeList[currentEpisodeIndex];
+        if (currentEp) {
+            const raw = currentEp.content_html || currentEp.summary || '';
+            document.getElementById('exp-cover-back-text').textContent =
+                raw ? stripHTML(raw) : 'Nessuna descrizione disponibile.';
+        }
+        document.getElementById('exp-cover-inner').classList.remove('flipped');
+    }
+
     function play(url, title, author, image) {
         if (currentHls) { currentHls.destroy(); currentHls = null; }
         const isHLS = url && (url.endsWith('.m3u8') || url.includes('.m3u8'));
@@ -704,6 +801,7 @@
         document.getElementById('play-svg').style.display = 'none';
         document.getElementById('pause-svg').style.display = '';
         setupMediaSession(title, author, image);
+        updateEpisodeDescription();
     }
 
     backBtn.onclick = () => {
@@ -807,6 +905,7 @@
         document.getElementById('exp-podcast-name').textContent = document.getElementById('p-pod').textContent;
         document.getElementById('exp-title').textContent = document.getElementById('p-title').textContent;
         document.getElementById('exp-author').textContent = document.getElementById('p-pod').textContent;
+        document.getElementById('exp-cover-inner').classList.remove('flipped');
         syncExpandedPlayState();
     }
 
