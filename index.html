@@ -74,7 +74,7 @@
             border-radius: 20px 20px 0 0;
         }
         #player.visible { transform: translateY(0); }
-        #player-top { display: flex; align-items: center; gap: 14px; }
+        #player-top { display: flex; align-items: center; gap: 12px; }
         #player-middle { display: flex; justify-content: center; align-items: center; gap: 8px; }
 
         #p-thumb {
@@ -140,14 +140,24 @@
         #player-expanded.visible { transform: translateY(0); }
 
         #exp-topbar {
-            display: flex; align-items: center; justify-content: center;
-            padding: 12px 0 4px; position: relative; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0 4px; position: relative;
+            flex-shrink: 0;
+        }
+        #exp-podcast-name {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 13px; font-weight: 700;
+            color: rgba(255,255,255,0.6); letter-spacing: 0.3px;
+            text-align: center; pointer-events: none;
+            max-width: 55%;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         #exp-close-btn {
-            position: absolute; left: 0; background: none; border: none; cursor: pointer;
-            color: rgba(255,255,255,0.7); padding: 8px; display: flex; align-items: center;
+            background: none; border: none; cursor: pointer;
+            color: rgba(255,255,255,0.7); padding: 8px;
+            display: flex; align-items: center;
+            flex-shrink: 0;
         }
-        #exp-podcast-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.3px; text-align: center; }
 
         #exp-cover { display: flex; align-items: center; justify-content: center; padding: 12px 0; flex-shrink: 0; }
         #exp-cover img {
@@ -279,6 +289,7 @@
             <div class="p-title" id="p-title">Nessun episodio in riproduzione</div>
             <div class="p-pod" id="p-pod">Il Post</div>
         </div>
+        <button id="speed-btn" title="Velocità di riproduzione">1x</button>
     </div>
     <div id="player-middle">
         <button class="p-ctrl-btn" id="prev-ep-btn" title="Episodio precedente">
@@ -302,7 +313,6 @@
                 <text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-family="Inter,system-ui,sans-serif" font-weight="700" fill="currentColor">10</text>
             </svg>
         </button>
-        <button id="speed-btn" title="Velocità di riproduzione">1x</button>
         <button class="p-ctrl-btn" id="next-ep-btn" title="Episodio successivo">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
         </button>
@@ -324,6 +334,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <span id="exp-podcast-name"></span>
+        <button id="exp-speed-btn" title="Velocità di riproduzione">1x</button>
     </div>
     <div id="exp-cover"><img id="exp-cover-img" src=""></div>
     <div id="exp-meta">
@@ -364,7 +375,6 @@
         <button class="exp-ctrl-btn" id="exp-next-btn">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
         </button>
-        <button id="exp-speed-btn" title="Velocità di riproduzione">1x</button>
     </div>
 </div>
 
@@ -580,7 +590,7 @@
         const json = await res.json();
         currentEpisodeList = json.data;
         renderEpisodes(json.data, p.image);
-        appendLoadMoreButton();
+        if (json.data.length >= HITS_PER_PAGE) appendLoadMoreButton();
     }
 
     let currentHls = null;
