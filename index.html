@@ -135,18 +135,18 @@
             touch-action: none;
         }
         #prog-track {
-            position: absolute; left: 0; right: 0; height: 3px;
-            background: rgba(255,255,255,0.2); border-radius: 3px;
+            position: absolute; left: 0; right: 0; height: 6px;
+            background: rgba(255,255,255,0.2); border-radius: 6px;
         }
         #prog-fill {
             height: 100%; background: #e94560; width: 0%;
-            border-radius: 3px; pointer-events: none; position: relative;
+            border-radius: 6px; pointer-events: none; position: relative;
             transition: width 0.1s linear;
         }
         #prog-thumb {
-            position: absolute; right: -7px; top: 50%;
+            position: absolute; right: -9px; top: 50%;
             transform: translateY(-50%);
-            width: 14px; height: 14px; border-radius: 50%;
+            width: 18px; height: 18px; border-radius: 50%;
             background: #ffffff; pointer-events: none;
             box-shadow: 0 0 6px rgba(0,0,0,0.4);
             transition: transform 0.1s;
@@ -287,7 +287,7 @@
         list.forEach(p => {
             const el = document.createElement('div');
             el.className = 'card';
-            el.innerHTML = `<img src="${p.image}" loading="lazy"><div class="card-name">${p.title}</div>`;
+            el.innerHTML = `<img src="${p.image}" loading="lazy"><div class="card-name">${decodeHTML(p.title)}</div>`;
             el.onclick = () => openPodcast(p);
             grid.appendChild(el);
         });
@@ -306,6 +306,12 @@
     let currentPage = 1;
     const HITS_PER_PAGE = 20;
 
+    function decodeHTML(str) {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    }
+
     function renderEpisodes(episodes, podcastImage) {
         const container = document.getElementById('ep-items');
         // Rimuove il bottone "carica altri" se presente
@@ -318,15 +324,15 @@
             item.innerHTML = `
                 <img class="ep-thumb" src="${ep.image || podcastImage}">
                 <div class="ep-info">
-                    <div class="ep-title">${ep.title}</div>
-                    <div class="ep-desc">${ep.description || ''}</div>
+                    <div class="ep-title">${decodeHTML(ep.title)}</div>
+                    <div class="ep-desc">${decodeHTML(ep.description || '')}</div>
                 </div>
                 <button class="ep-play-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
                 </button>`;
             item.onclick = (e) => {
                 e.stopPropagation();
-                play(ep.episode_raw_url, ep.title, currentPodcast.title, ep.image || podcastImage);
+                play(ep.episode_raw_url, ep.title, ep.author || currentPodcast.author, ep.image || podcastImage);
             };
             container.appendChild(item);
         });
@@ -373,8 +379,8 @@
         searchInput.style.display = 'none';
 
         document.getElementById('pd-img').src = p.image;
-        document.getElementById('pd-title').textContent = p.title;
-        document.getElementById('pd-author').textContent = 'di ' + p.author;
+        document.getElementById('pd-title').textContent = decodeHTML(p.title);
+        document.getElementById('pd-author').textContent = 'di ' + decodeHTML(p.author);
 
         const container = document.getElementById('ep-items');
         container.innerHTML = '';
@@ -390,7 +396,7 @@
     function play(url, title, author, image) {
         audio.src = url;
         audio.play();
-        document.getElementById('p-title').textContent = title;
+        document.getElementById('p-title').textContent = decodeHTML(title);
         document.getElementById('p-pod').textContent = author;
         document.getElementById('p-thumb').src = image;
         playerBar.classList.add('visible');
