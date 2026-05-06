@@ -62,7 +62,7 @@
         }
         #header-logo-row { display: flex; justify-content: center; align-items: center; }
         #header-logo { height: 28px; width: auto; }
-        #header-logo-dark { height: 28px; width: auto; display: none; }
+        #header-logo-dark { height: 28px; width: auto; display: none; filter: brightness(0) invert(1); }
         @media (prefers-color-scheme: dark) {
             #header-logo { display: none; }
             #header-logo-dark { display: block; }
@@ -88,7 +88,6 @@
         .card-name { font-size: 13px; font-weight: 700; margin-top: 6px; line-height: 1.3; color: var(--text); }
         .card.is-favorite img { outline: 4px solid #f5c518; outline-offset: -2px; border-radius: var(--radius); }
 
-        /* Episodi */
         .ep-item { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--border); }
         .ep-thumb { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--surface); }
         .ep-info { flex: 1; min-width: 0; }
@@ -162,7 +161,8 @@
         #exp-cover { display: flex; align-items: center; justify-content: center; flex: 1; perspective: 1000px; padding: 4px 0; }
         #exp-cover-inner {
             position: relative;
-            width: min(320px, 82vw, 52vh); height: min(320px, 82vw, 52vh);
+            width: min(320px, 82vw, 52vh);
+            height: min(320px, 82vw, 52vh);
             transform-style: preserve-3d;
             transition: transform 0.6s cubic-bezier(.4,0,.2,1); cursor: pointer;
         }
@@ -192,29 +192,26 @@
         #exp-controls { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
         #exp-pp-btn { width: 58px; height: 58px; border-radius: 50%; background: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); transition: transform 0.1s; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
         #exp-pp-btn:active { transform: scale(0.93); }
-        .exp-ctrl-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.8); padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; border-radius: 8px; -webkit-tap-highlight-color: transparent; }
+        .exp-ctrl-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.8); padding: 8px; display: flex; align-items: center; border-radius: 8px; -webkit-tap-highlight-color: transparent; }
         .exp-ctrl-btn:active { background: rgba(255,255,255,0.1); }
 
         /* Nuovi episodi */
         #new-episodes-section { margin-bottom: 24px; display: none; }
         #new-episodes-section h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text); margin-bottom: 12px; }
 
-        /* Pulsante play circolare con progresso */
-        .play-progress-wrap {
-            position: relative; width: 44px; height: 44px; flex-shrink: 0; cursor: pointer;
-        }
-        .play-progress-wrap svg.progress-ring {
-            position: absolute; inset: 0; width: 44px; height: 44px;
-            transform: rotate(-90deg); pointer-events: none;
-        }
+        /* Cerchio progresso play */
+        .play-progress-wrap { position: relative; width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; }
+        .play-progress-wrap svg.progress-ring { position: absolute; inset: 0; width: 44px; height: 44px; transform: rotate(-90deg); pointer-events: none; }
         .progress-ring .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 3; }
-        .progress-ring .ring-fill { fill: none; stroke: #00bcd4; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 125.66; stroke-dashoffset: 125.66; transition: stroke-dashoffset 0.3s; }
+        .progress-ring .ring-fill { fill: none; stroke: #00bcd4; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 125.66; stroke-dashoffset: 125.66; transition: stroke-dashoffset 0.4s ease; }
         .play-progress-btn {
             position: absolute; inset: 5px; border-radius: 50%;
             background: var(--surface2); border: none;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s;
         }
+        .play-progress-btn:active { background: var(--border); }
         .play-progress-btn svg { color: var(--text); }
 
         .new-ep-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
@@ -223,15 +220,14 @@
         .new-ep-title { font-size: 14px; font-weight: 700; line-height: 1.3; color: var(--text); margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .new-ep-meta { font-size: 12px; color: var(--muted); }
 
-        /* Sezione "Da finire" */
+        /* Sezione Da finire */
         #resume-section { margin-bottom: 24px; display: none; }
         #resume-section h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text); margin-bottom: 12px; }
         .resume-card {
             background: var(--surface); border-radius: 14px;
             padding: 14px; display: flex; align-items: center; gap: 14px;
-            cursor: pointer; position: relative; overflow: hidden;
+            cursor: pointer; position: relative; overflow: hidden; margin-bottom: 10px;
         }
-        .resume-thumb { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
         .resume-info { flex: 1; min-width: 0; }
         .resume-title { font-size: 14px; font-weight: 700; line-height: 1.3; color: var(--text); margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .resume-meta { font-size: 12px; color: var(--muted); }
@@ -240,11 +236,8 @@
             background: var(--accent); border: none; color: var(--bg);
             display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;
         }
-        .resume-progress-bar {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-            background: var(--surface2); border-radius: 0 0 14px 14px;
-        }
-        .resume-progress-fill { height: 100%; background: #00bcd4; border-radius: 0 0 14px 14px; transition: width 0.3s; }
+        .resume-progress-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--surface2); border-radius: 0 0 14px 14px; }
+        .resume-progress-fill { height: 100%; background: #00bcd4; border-radius: 0 0 14px 14px; }
 
         /* Stella */
         .star-btn {
@@ -288,7 +281,7 @@
 <header>
     <div id="header-logo-row">
         <img id="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Il_Post_logo.svg/3840px-Il_Post_logo.svg.png" alt="Il Post">
-        <img id="header-logo-dark" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Il_Post_logo.svg/3840px-Il_Post_logo.svg.png" alt="Il Post" style="filter: invert(1);">
+        <img id="header-logo-dark" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Il_Post_logo.svg/3840px-Il_Post_logo.svg.png" alt="Il Post">
     </div>
     <div id="header-search-row">
         <button id="back-btn">←</button>
@@ -501,8 +494,7 @@ function formatDate(ts) {
 }
 function formatDuration(sec) {
     if (!sec) return '';
-    const m = Math.round(sec / 60);
-    return m + ' min';
+    return Math.round(sec / 60) + ' min';
 }
 
 // ── Progresso per episodio ────────────────────────────────────
@@ -519,17 +511,15 @@ function saveLastEpisode(podcastId, epData) {
 function loadLastEpisode(podcastId) {
     try { return JSON.parse(localStorage.getItem(`last_ep_${podcastId}`) || 'null'); } catch { return null; }
 }
-
-// Calcola % progresso (0-1) per un episodio
 function getProgressRatio(podcastId, episodeId, duration) {
     if (!duration) return 0;
     return Math.min(loadProgress(podcastId, episodeId) / duration, 1);
 }
 
 // ── Ring SVG helper ───────────────────────────────────────────
-const CIRCUMFERENCE = 2 * Math.PI * 20; // r=20 → 125.66
+const CIRCUMFERENCE = 125.66; // 2 * π * 20
 function makePlayBtn(ratio, onPlay) {
-    const offset = CIRCUMFERENCE * (1 - ratio);
+    const offset = CIRCUMFERENCE * (1 - Math.min(Math.max(ratio, 0), 1));
     const wrap = document.createElement('div');
     wrap.className = 'play-progress-wrap';
     wrap.innerHTML = `
@@ -538,9 +528,13 @@ function makePlayBtn(ratio, onPlay) {
             <circle class="ring-fill" cx="22" cy="22" r="20" style="stroke-dashoffset:${offset}"/>
         </svg>
         <button class="play-progress-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6,3 20,12 6,21"/>
+            </svg>
         </button>`;
-    wrap.querySelector('.play-progress-btn').addEventListener('click', (e) => { e.stopPropagation(); onPlay(); });
+    wrap.querySelector('.play-progress-btn').addEventListener('click', (e) => {
+        e.stopPropagation(); onPlay();
+    });
     return wrap;
 }
 
@@ -618,7 +612,6 @@ function renderResumeSection() {
     const list = document.getElementById('resume-list');
     list.innerHTML = '';
 
-    // Raccogli tutti gli episodi con progresso parziale (> 5s, < 95%)
     const candidates = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -636,26 +629,77 @@ function renderResumeSection() {
 
     if (candidates.length === 0) { section.style.display = 'none'; return; }
 
-    // Mostra al massimo gli ultimi 3
     candidates.slice(0, 3).forEach(({ ep, podcastId, saved, duration, ratio }) => {
         const podcast = allPodcasts.find(p => String(p.id) === String(podcastId));
         const card = document.createElement('div');
         card.className = 'resume-card';
         const pct = (ratio * 100).toFixed(0);
         const remaining = duration > 0 ? Math.round((duration - saved) / 60) : null;
-        card.innerHTML = `
-            <img class="resume-thumb" src="${ep.image || (podcast ? podcast.image : '')}">
-            <div class="resume-info">
-                <div class="resume-title">${decodeHTML(ep.title)}</div>
-                <div class="resume-meta">${remaining ? remaining + ' min rimanenti' : formatDate(ep.timestamp)}</div>
-            </div>
-            <button class="resume-play-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
-            </button>
-            <div class="resume-progress-bar"><div class="resume-progress-fill" style="width:${pct}%"></div></div>`;
 
-        card.onclick = async (e) => {
+        // Thumbnail con overlay rimozione
+        const thumbWrap = document.createElement('div');
+        thumbWrap.style.cssText = 'position:relative; width:64px; height:64px; flex-shrink:0;';
+
+        const thumb = document.createElement('img');
+        thumb.src = ep.image || (podcast ? podcast.image : '');
+        thumb.style.cssText = 'width:64px; height:64px; border-radius:10px; object-fit:cover; display:block; transition:opacity 0.2s;';
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position:absolute; inset:0; border-radius:10px;
+            background:rgba(0,0,0,0.5);
+            display:flex; align-items:center; justify-content:center;
+            opacity:0; transition:opacity 0.2s; pointer-events:none; cursor:pointer;`;
+        overlay.innerHTML = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="8" y1="8" x2="16" y2="16"/>
+            <line x1="16" y1="8" x2="8" y2="16"/>
+        </svg>`;
+
+        let overlayVisible = false;
+        thumbWrap.style.cursor = 'pointer';
+        thumbWrap.addEventListener('click', (e) => {
             e.stopPropagation();
+            overlayVisible = !overlayVisible;
+            overlay.style.opacity = overlayVisible ? '1' : '0';
+            overlay.style.pointerEvents = overlayVisible ? 'auto' : 'none';
+            thumb.style.opacity = overlayVisible ? '0.5' : '1';
+        });
+
+        overlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            localStorage.removeItem(`last_ep_${podcastId}`);
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(-16px)';
+            setTimeout(() => renderResumeSection(), 320);
+        });
+
+        thumbWrap.appendChild(thumb);
+        thumbWrap.appendChild(overlay);
+
+        const info = document.createElement('div');
+        info.className = 'resume-info';
+        info.innerHTML = `
+            <div class="resume-title">${decodeHTML(ep.title)}</div>
+            <div class="resume-meta">${remaining ? remaining + ' min rimanenti' : formatDate(ep.timestamp)}</div>`;
+
+        const playBtn = document.createElement('button');
+        playBtn.className = 'resume-play-btn';
+        playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>`;
+        playBtn.addEventListener('click', (e) => e.stopPropagation());
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'resume-progress-bar';
+        progressBar.innerHTML = `<div class="resume-progress-fill" style="width:${pct}%"></div>`;
+
+        card.appendChild(thumbWrap);
+        card.appendChild(info);
+        card.appendChild(playBtn);
+        card.appendChild(progressBar);
+
+        card.onclick = async () => {
             if (podcast && (!currentPodcast || currentPodcast.id !== podcast.id)) {
                 currentPodcast = podcast; currentPage = 1;
                 const proxy = 'https://api.codetabs.com/v1/proxy/?quest=';
@@ -668,13 +712,14 @@ function renderResumeSection() {
             play(ep.episode_raw_url, ep.title, ep.author || (podcast ? podcast.author : ''), ep.image || (podcast ? podcast.image : ''));
             updatePrevNextButtons();
         };
+
         list.appendChild(card);
     });
 
     section.style.display = 'block';
 }
 
-// ── Nuovi episodi (dai preferiti) ─────────────────────────────
+// ── Nuovi episodi ─────────────────────────────────────────────
 async function loadNewEpisodes() {
     const section = document.getElementById('new-episodes-section');
     const list = document.getElementById('new-episodes-list');
@@ -690,14 +735,16 @@ async function loadNewEpisodes() {
     const episodes = results.filter(Boolean).sort((a, b) => b.ep.timestamp - a.ep.timestamp).slice(0, 5);
     list.innerHTML = '';
     episodes.forEach(({ ep, podcast }) => {
-        const ratio = getProgressRatio(podcast.id, ep.id, ep.duration);
+        const savedTime = loadProgress(podcast.id, ep.id);
+        const estimatedDuration = ep.duration || (savedTime > 0 ? savedTime * 1.1 : 0);
+        const ratio = getProgressRatio(podcast.id, ep.id, estimatedDuration);
+
         const item = document.createElement('div');
         item.className = 'new-ep-item';
-        item.style.cursor = 'pointer';
 
-        const info = document.createElement('img');
-        info.className = 'new-ep-thumb';
-        info.src = ep.image || podcast.image;
+        const thumb = document.createElement('img');
+        thumb.className = 'new-ep-thumb';
+        thumb.src = ep.image || podcast.image;
 
         const infoDiv = document.createElement('div');
         infoDiv.className = 'new-ep-info';
@@ -708,8 +755,7 @@ async function loadNewEpisodes() {
         const playBtn = makePlayBtn(ratio, async () => {
             if (!currentPodcast || currentPodcast.id !== podcast.id) {
                 currentPodcast = podcast; currentPage = 1;
-                const proxy2 = 'https://api.codetabs.com/v1/proxy/?quest=';
-                const res = await fetch(proxy2 + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${podcast.id}/?pg=1&hits=${HITS_PER_PAGE}`));
+                const res = await fetch(proxy + encodeURIComponent(`https://api-prod.ilpost.it/podcast/v1/podcast/${podcast.id}/?pg=1&hits=${HITS_PER_PAGE}`));
                 const json = await res.json();
                 currentEpisodeList = json.data || [];
             }
@@ -719,7 +765,7 @@ async function loadNewEpisodes() {
             updatePrevNextButtons();
         });
 
-        item.appendChild(info);
+        item.appendChild(thumb);
         item.appendChild(infoDiv);
         item.appendChild(playBtn);
         item.onclick = () => playBtn.querySelector('.play-progress-btn').click();
@@ -790,11 +836,10 @@ async function loadMoreEpisodes() {
     } else { btn.remove(); }
 }
 function appendLoadMoreButton() {
-    const container = document.getElementById('ep-items');
     const btn = document.createElement('button');
     btn.id = 'load-more-btn'; btn.textContent = 'Carica altri episodi';
     btn.onclick = loadMoreEpisodes;
-    container.appendChild(btn);
+    document.getElementById('ep-items').appendChild(btn);
 }
 
 async function openPodcast(p) {
@@ -848,7 +893,6 @@ function play(url, title, author, image) {
     const ep = currentEpisodeList[currentEpisodeIndex];
     const episodeId = ep?.id;
 
-    // Salva l'episodio corrente come "ultimo episodio" del podcast
     if (ep && podcastId) saveLastEpisode(podcastId, ep);
 
     if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
@@ -882,9 +926,7 @@ function play(url, title, author, image) {
     renderResumeSection();
 }
 
-document.getElementById('pp-bar').onclick = () => {
-    if (audio.paused) { audio.play(); } else { audio.pause(); }
-};
+document.getElementById('pp-bar').onclick = () => { if (audio.paused) audio.play(); else audio.pause(); };
 audio.onended = () => {
     if (currentEpisodeIndex < currentEpisodeList.length - 1) playEpisodeAtIndex(currentEpisodeIndex + 1);
     else { document.getElementById('play-svg').style.display = ''; document.getElementById('pause-svg').style.display = 'none'; }
@@ -908,7 +950,7 @@ audio.onloadedmetadata = () => {
     document.getElementById('exp-time-total').textContent = formatTime(audio.duration);
 };
 
-// ── Seek bar (mini player) ────────────────────────────────────
+// ── Seek bars ────────────────────────────────────────────────
 (function() {
     const bar = document.getElementById('prog-bar');
     let dragging = false;
@@ -926,7 +968,6 @@ audio.onloadedmetadata = () => {
     document.addEventListener('touchend', () => { dragging = false; });
 })();
 
-// ── Seek bar (player espanso) ─────────────────────────────────
 (function() {
     const bar = document.getElementById('exp-prog-bar');
     let dragging = false;
@@ -976,7 +1017,7 @@ document.getElementById('exp-skip-fwd-btn').addEventListener('click', () => { au
 document.getElementById('exp-prev-btn').addEventListener('click', () => playEpisodeAtIndex(currentEpisodeIndex - 1));
 document.getElementById('exp-next-btn').addEventListener('click', () => playEpisodeAtIndex(currentEpisodeIndex + 1));
 
-// ── Swipe sinistra per chiudere mini player ───────────────────
+// ── Swipe sinistra chiude mini player ─────────────────────────
 (function() {
     const player = document.getElementById('player');
     let startX = null, startY = null;
