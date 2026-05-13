@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <link rel="manifest" href="/postcast/manifest.json">
-    <link rel="apple-touch-icon" href="/postcast/icon-180.png">
+    <link rel="manifest" href="/IlPostPodcast/manifest.json">
+    <link rel="apple-touch-icon" href="/IlPostPodcast/icon-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Il Post">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -86,8 +86,31 @@
 
         #player-expanded { position: fixed; inset: 0; z-index: 300; background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%); display: flex; flex-direction: column; align-items: center; padding: env(safe-area-inset-top, 12px) 24px calc(32px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); overflow: hidden; justify-content: space-between; height: 100dvh; max-height: 100dvh; }
         #player-expanded.visible { transform: translateY(0); }
-        #exp-topbar { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 0; flex-shrink: 0; }
-        #exp-podcast-name { position: absolute; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); text-align: center; pointer-events: auto; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+        #exp-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 0;
+    flex-shrink: 0;
+    /* Rimuovi position: relative se presente */
+}
+        #exp-podcast-name {
+    /* Rimuovi position absolute, diventa flex item normale */
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 8px; /* respiro laterale dai bottoni */
+}
         #exp-close-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.7); padding: 8px; display: flex; align-items: center; }
         #exp-cover { display: flex; align-items: center; justify-content: center; flex: 1; perspective: 1000px; padding: 4px 0; }
         #exp-cover-inner { position: relative; width: min(320px, 82vw, 52vh); height: min(320px, 82vw, 52vh); transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,0,.2,1); cursor: pointer; }
@@ -820,7 +843,8 @@ function renderResumeSection() {
             }
             currentEpisodeIndex = currentEpisodeList.findIndex(e => String(e.id) === String(ep.id));
             if (currentEpisodeIndex === -1) { currentEpisodeList = [ep]; currentEpisodeIndex = 0; }
-            play(ep.episode_raw_url, ep.title, ep.author || podcast?.author, ep.image || podcast?.image);
+            play(ep.episode_raw_url, ep.title, ep.author || podcast?.author, ep.image || podcast?.image, ep);
+
             updatePrevNextButtons();
         });
 
@@ -860,7 +884,7 @@ function buildNewEpItem(ep, podcast, isFav) {
         }
         currentEpisodeIndex = currentEpisodeList.findIndex(e => e.id === ep.id);
         if (currentEpisodeIndex === -1) currentEpisodeIndex = 0;
-        play(ep.episode_raw_url, ep.title, ep.author || podcast.author, ep.image || podcast.image);
+        play(ep.episode_raw_url, ep.title, ep.author || podcast.author, ep.image || podcast.image, ep);
         updatePrevNextButtons();
     });
 
@@ -932,7 +956,7 @@ searchInput.oninput = () => {
     renderPodcasts(getFilteredPodcasts());
     clearTimeout(searchEpTimeout);
     if (q.length >= 3) {
-        searchEpTimeout = setTimeout(() => searchEpisodes(q), 600);
+        searchEpTimeout = setTimeout(() => searchEpisodes(q), 500);
     } else {
         $('episode-search-results')?.remove();
     }
@@ -950,7 +974,7 @@ function playEpisodeAtIndex(index) {
     currentEpisodeIndex = index;
     playingFromQueue    = false;
     const ep = currentEpisodeList[index];
-    play(ep.episode_raw_url, ep.title, ep.author || currentPodcast.author, ep.image || currentPodcast.image);
+    play(ep.episode_raw_url, ep.title, ep.author || currentPodcast.author, ep.image || currentPodcast.image, ep);
     updatePrevNextButtons();
 }
 
@@ -1036,7 +1060,7 @@ async function loadMoreEpisodes() {
     if (json.data?.length > 0) {
         currentEpisodeList = [...currentEpisodeList, ...json.data];
         renderEpisodes(json.data, currentPodcast.image);
-        if ((json.data || []).length >= HITS_PER_PAGE) appendLoadMoreButton();
+        if (json.data.length >= HITS_PER_PAGE) appendLoadMoreButton();
     } else {
         btn.remove();
     }
@@ -1131,17 +1155,18 @@ $('exp-autoplay-btn').addEventListener('click', toggleAutoplay);
 updateAutoplayBtns();
 
 // ── Descrizione episodio ──────────────────────────────────────
-function updateEpisodeDescription() {
-    const ep = currentEpisodeList[currentEpisodeIndex];
+function updateEpisodeDescription(epOverride = null) {
+    const ep = epOverride || currentEpisodeList[currentEpisodeIndex];
     if (!ep) return;
+
     $('exp-cover-back-text').innerHTML = ep.content_html
         ? stripHTML(ep.content_html)
         : (ep.summary ? decodeHTML(ep.summary) : '');
+
     $('exp-cover-inner').classList.remove('flipped');
 }
-
 // ── Play ──────────────────────────────────────────────────────
-function play(url, title, author, image) {
+function play(url, title, author, image, epData = null) {
     if (currentHls) { currentHls.destroy(); currentHls = null; }
     const ep        = currentEpisodeList[currentEpisodeIndex];
     const podcastId = currentPodcast?.id;
@@ -1178,7 +1203,7 @@ function play(url, title, author, image) {
     $('play-svg').style.display  = 'none';
     $('pause-svg').style.display = '';
     setupMediaSession(title, author, image);
-    updateEpisodeDescription();
+    updateEpisodeDescription(epData || currentEpisodeList[currentEpisodeIndex]);
     renderResumeSection();
 }
 
@@ -1571,9 +1596,6 @@ function playFromQueue(idx) {
     const item = episodeQueue.splice(idx, 1)[0];
     updateQueueBadge(); renderQueuePanel(); refreshQueueButtons();
     playingFromQueue = true;
-    currentPodcast = allPodcasts.find(p => String(p.author) === String(item.author)) || currentPodcast;
-    currentEpisodeList = [{ id: item.id, title: item.title, episode_raw_url: item.url, author: item.author, image: item.image }];
-    currentEpisodeIndex = 0;
     play(item.url, item.title, item.author, item.image);
 }
 
@@ -1614,7 +1636,7 @@ $('queue-clear-btn').addEventListener('click', () => {
 
 // ── Service Worker ────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/postcast/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/IlPostPodcast/sw.js').catch(() => {});
 }
 
 // ── Collasso sezioni ──────────────────────────────────────────
