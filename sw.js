@@ -5,9 +5,7 @@ const ASSETS = [
   "/IlPostPodcast/manifest.json",
   "/IlPostPodcast/icon-180.png",
   "/IlPostPodcast/icon-192.png",
-  "/IlPostPodcast/icon-512.png",
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Il_Post_logo.svg/3840px-Il_Post_logo.svg.png',
-    'https://www.ilpost.it/error/images/ilpost-unleashed.svg'
+  "/IlPostPodcast/icon-512.png"
 ];
 
 // ── Install: precache della shell ────────────────────────────
