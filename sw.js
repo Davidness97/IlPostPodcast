@@ -1,4 +1,4 @@
-const CACHE = "ilpost-v2";
+const CACHE = "ilpost-v2.1";
 const ASSETS = [
   "/IlPostPodcast/",
   "/IlPostPodcast/index.html",
