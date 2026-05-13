@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <link rel="manifest" href="/postcast/manifest.json">
-    <link rel="apple-touch-icon" href="/postcast/icon-180.png">
+    <link rel="manifest" href="/IlPostPodcast/manifest.json">
+    <link rel="apple-touch-icon" href="/IlPostPodcast/icon-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Il Post">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1646,7 +1646,7 @@ $('queue-clear-btn').addEventListener('click', () => {
 
 // ── Service Worker ────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/postcast/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/IlPostPodcast/sw.js').catch(() => {});
 }
 
 // ── Collasso sezioni ──────────────────────────────────────────
